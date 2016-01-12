@@ -1,0 +1,89 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+    </head>
+    <body>
+        <script>
+			(function() {
+			    function loadScripts(scriptPaths, callback) {
+			        var totalScripts = scriptPaths.length;
+			        var successScripts = 0;
+			        var failScripts = 0;
+
+			        function loadScript(scriptPath) {
+			            if (localStorage.getItem(scriptPath)) {
+			                var script = document.createElement('script');
+			                script.src = 'data:text/javascript,' + encodeURI(localStorage.getItem(scriptPath));
+			                script.addEventListener('load', function () {
+			                    successScripts += 1;
+			                    
+			                    if (scriptsLoaded()) {
+			                        callback();
+			                    }
+			                });
+
+			                script.addEventListener('error', function () {
+			                    failScripts += 1;
+			                    
+			                    if (scriptsLoaded()) {
+			                        callback();
+			                    }
+			                });
+
+			                document.body.appendChild(script);
+			            }
+
+			            else {
+			                var xmlhttp = new XMLHttpRequest();
+
+			                xmlhttp.addEventListener('readystatechange', function () {
+			                    if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+			                        localStorage.setItem(scriptPath, xmlhttp.responseText);
+			                    }                   
+			                })
+
+			                xmlhttp.open("GET", scriptPath, true);
+			                xmlhttp.send();
+
+			                var script = document.createElement('script');
+			                script.src = scriptPath;
+			                script.addEventListener('load', function () {
+			                    successScripts += 1;
+
+			                    if (scriptsLoaded()) {
+			                        callback();
+			                    }
+			                });
+
+			                script.addEventListener('error', function () {
+			                    failScripts += 1;
+			                    
+			                    if (scriptsLoaded()) {
+			                        callback();
+			                    }
+			                });			                
+			                
+			                document.body.appendChild(script);                
+			            }
+			        }
+
+			        function scriptsLoaded() {
+			            return (totalScripts === successScripts + failScripts)
+			        }                    
+
+			        for (var i = 0; i < scriptPaths.length; i++) {
+			            loadScript(scriptPaths[i])
+			        }
+			    }
+
+			    loadScripts([
+			        "https://cdnjs.cloudflare.com/ajax/libs/jquery/3.0.0-alpha1/jquery.min.js", 
+			        "https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.3/modernizr.min.js",
+			    ], function () {console.log('Scripts Loaded')})
+			})();       
+        </script>
+    </body>
+</html>
